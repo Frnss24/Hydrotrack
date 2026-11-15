@@ -126,7 +126,7 @@ export default function ProfileAboutPage() {
             type="number"
             min={500}
             max={6000}
-            step={50}
+            step="any"
             value={profile.dailyTargetMl}
             onChange={(e) =>
               setProfile((prev) => ({ ...prev, dailyTargetMl: e.target.value }))
