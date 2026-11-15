@@ -1,31 +1,23 @@
-import { supabase } from "../config/supabaseClient.js";
+import { pool } from "../config/db.js";
 
 export const CategoryModel = {
   async getAll() {
-    const { data, error } = await supabase
-      .from("beverage_categories")
-      .select("*")
-      .order("name", { ascending: true });
-    if (error) throw error;
-    return data;
+    const { rows } = await pool.query(
+      "SELECT id, name FROM beverage_categories ORDER BY name ASC"
+    );
+    return rows;
   },
 
   async create(name) {
-    const { data, error } = await supabase
-      .from("beverage_categories")
-      .insert([{ name }])
-      .select()
-      .single();
-    if (error) throw error;
-    return data;
+    const { rows } = await pool.query(
+      "INSERT INTO beverage_categories (name) VALUES ($1) RETURNING id, name",
+      [name]
+    );
+    return rows[0];
   },
 
   async remove(id) {
-    const { error } = await supabase
-      .from("beverage_categories")
-      .delete()
-      .eq("id", id);
-    if (error) throw error;
+    await pool.query("DELETE FROM beverage_categories WHERE id = $1", [id]);
     return { message: "Category deleted successfully" };
   },
 };

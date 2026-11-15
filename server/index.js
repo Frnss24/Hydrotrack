@@ -1,7 +1,7 @@
 import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
-import { isSupabaseConfigured } from "./config/supabaseClient.js";
+import { isDatabaseConfigured } from "./config/db.js";
 import categoryRoutes from "./routes/categoryRoutes.js";
 import beverageRoutes from "./routes/beverageRoutes.js";
 import logRoutes from "./routes/logRoutes.js";
@@ -17,17 +17,18 @@ app.get("/api", (req, res) => {
     success: true,
     name: "HydroTrack API – Daily Hydration Tracker",
     version: "1.0.0",
-    supabaseConfigured: isSupabaseConfigured,
+    database: "Neon PostgreSQL",
+    databaseConfigured: isDatabaseConfigured,
     endpoints: ["/api/categories", "/api/beverages", "/api/logs"],
   });
 });
 
 app.use("/api", (req, res, next) => {
-  if (!isSupabaseConfigured) {
+  if (!isDatabaseConfigured) {
     return res.status(503).json({
       success: false,
       message:
-        "Supabase belum dikonfigurasi. Isi SUPABASE_URL dan SUPABASE_KEY di .env.",
+        "Database Neon belum dikonfigurasi. Isi DATABASE_URL di file .env.",
     });
   }
   next();

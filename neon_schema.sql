@@ -1,5 +1,7 @@
--- Skema Database Supabase untuk HydroTrack
--- Jalankan seluruh query ini di SQL Editor Supabase
+-- Skema Database Neon PostgreSQL untuk HydroTrack
+-- Jalankan seluruh query ini di SQL Editor Neon (https://console.neon.tech)
+
+create extension if not exists pgcrypto;
 
 create table if not exists beverage_categories (
   id uuid primary key default gen_random_uuid(),
@@ -38,3 +40,4 @@ insert into beverage_categories (name) values
   ('Elektrolit Alami'),
   ('Minuman Hangat')
 on conflict (name) do nothing;
+
