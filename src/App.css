@@ -1,0 +1,286 @@
+/* HydroTrack Calming White & Blue — Animated Water Glass */
+
+.hydro-glass-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 176px;
+  padding: 0.25rem 0.5rem;
+  user-select: none;
+}
+
+.hydro-glass-stage {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hydro-glass-stage.is-pouring {
+  transform: scale(1.03);
+}
+
+.hydro-glass-svg {
+  display: block;
+  overflow: visible;
+  filter: drop-shadow(0 8px 18px rgba(2, 132, 199, 0.14));
+}
+
+/* Smooth rising / falling water level */
+.hydro-water-level {
+  transition: transform 0.85s cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+
+/* Horizontal continuous wave animations */
+.hydro-wave--front {
+  animation: hydroWaveSlideFront 3.6s linear infinite;
+}
+
+.hydro-wave--back {
+  animation: hydroWaveSlideBack 5.2s linear infinite;
+}
+
+.hydro-wave--fast.hydro-wave--front {
+  animation-duration: 1.3s;
+}
+
+.hydro-wave--fast.hydro-wave--back {
+  animation-duration: 1.8s;
+}
+
+@keyframes hydroWaveSlideFront {
+  0% {
+    transform: translateX(0);
+  }
+  100% {
+    transform: translateX(160px);
+  }
+}
+
+@keyframes hydroWaveSlideBack {
+  0% {
+    transform: translateX(160px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* Pouring stream & splash droplets */
+.hydro-pour-stream {
+  animation: hydroStreamPulse 0.35s ease-in-out infinite alternate;
+}
+
+@keyframes hydroStreamPulse {
+  0% {
+    opacity: 0.82;
+    transform: scaleX(0.92);
+    transform-origin: center;
+  }
+  100% {
+    opacity: 1;
+    transform: scaleX(1.12);
+    transform-origin: center;
+  }
+}
+
+.hydro-splash-drop--left {
+  animation: hydroSplashLeft 0.55s ease-out infinite;
+}
+
+.hydro-splash-drop--right {
+  animation: hydroSplashRight 0.55s ease-out 0.1s infinite;
+}
+
+.hydro-splash-drop--mid {
+  animation: hydroSplashMid 0.5s ease-out 0.18s infinite;
+}
+
+@keyframes hydroSplashLeft {
+  0% {
+    transform: translate(8px, 4px) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-12px, -14px) scale(1.1);
+    opacity: 0;
+  }
+}
+
+@keyframes hydroSplashRight {
+  0% {
+    transform: translate(-8px, 4px) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(12px, -15px) scale(1.1);
+    opacity: 0;
+  }
+}
+
+@keyframes hydroSplashMid {
+  0% {
+    transform: translate(0, 4px) scale(0.5);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(-4px, -18px) scale(1);
+    opacity: 0;
+  }
+}
+
+/* Rising bubbles inside water */
+.hydro-bubble--1 {
+  animation: hydroBubbleRise 3.2s ease-in infinite;
+}
+
+.hydro-bubble--2 {
+  animation: hydroBubbleRise 4.1s ease-in 1.1s infinite;
+}
+
+.hydro-bubble--3 {
+  animation: hydroBubbleRise 3.7s ease-in 0.5s infinite;
+}
+
+.hydro-bubble--burst1 {
+  animation: hydroBubbleBurst 0.9s ease-out infinite;
+}
+
+.hydro-bubble--burst2 {
+  animation: hydroBubbleBurst 1.05s ease-out 0.15s infinite;
+}
+
+.hydro-bubble--burst3 {
+  animation: hydroBubbleBurst 0.85s ease-out 0.28s infinite;
+}
+
+@keyframes hydroBubbleRise {
+  0% {
+    transform: translateY(0) scale(0.8);
+    opacity: 0;
+  }
+  25% {
+    opacity: 0.55;
+  }
+  100% {
+    transform: translateY(-95px) scale(1.15);
+    opacity: 0;
+  }
+}
+
+@keyframes hydroBubbleBurst {
+  0% {
+    transform: translateY(0) scale(0.6);
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(-110px) scale(1.25);
+    opacity: 0;
+  }
+}
+
+/* Floating +ml badge when water is added */
+.hydro-pour-badge {
+  position: absolute;
+  top: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10;
+  background: linear-gradient(135deg, #0284c7, #0ea5e9);
+  color: #ffffff;
+  font-size: 0.78rem;
+  font-weight: 800;
+  padding: 0.25rem 0.7rem;
+  border-radius: 9999px;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.32);
+  white-space: nowrap;
+  animation: hydroBadgePop 1.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+@keyframes hydroBadgePop {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, 14px) scale(0.75);
+  }
+  20% {
+    opacity: 1;
+    transform: translate(-50%, 0) scale(1.06);
+  }
+  75% {
+    opacity: 1;
+    transform: translate(-50%, -4px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -12px) scale(0.95);
+  }
+}
+
+/* Percentage pill centered over the glass */
+.hydro-glass-pct-pill {
+  position: absolute;
+  top: 52%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(6px);
+  border: 1.5px solid #bae6fd;
+  padding: 0.22rem 0.72rem;
+  border-radius: 9999px;
+  box-shadow: 0 4px 10px rgba(2, 132, 199, 0.14);
+  pointer-events: none;
+}
+
+.hydro-glass-pct-pill span {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0369a1;
+  letter-spacing: -0.02em;
+}
+
+/* Text info below the glass */
+.hydro-glass-info {
+  margin-top: 0.35rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.25rem;
+  text-align: center;
+}
+
+.hydro-glass-volume {
+  display: flex;
+  align-items: baseline;
+  gap: 0.25rem;
+}
+
+.hydro-glass-current {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.hydro-glass-target {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.hydro-glass-status {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #0284c7;
+  background: #f0f9ff;
+  border: 1px solid #bae6fd;
+  padding: 0.18rem 0.65rem;
+  border-radius: 9999px;
+}
+
+.hydro-glass-status--done {
+  color: #047857;
+  background: #ecfdf5;
+  border-color: #a7f3d0;
+}
