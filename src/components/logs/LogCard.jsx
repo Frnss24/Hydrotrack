@@ -1,5 +1,11 @@
 import { Droplets, Clock, ChevronRight, Sparkles } from 'lucide-react';
-import { formatTime, formatDate, truncate } from '../../utils/helpers';
+import {
+  formatTime,
+  formatDate,
+  truncate,
+  getHydrationIndex,
+  getEffectiveHydrationMl,
+} from '../../utils/helpers';
 
 export default function LogCard({ log, onSelect, showDate = false }) {
   const categoryColors = {
@@ -12,6 +18,8 @@ export default function LogCard({ log, onSelect, showDate = false }) {
 
   const badgeStyle =
     categoryColors[log.category] || 'bg-sky-50 text-sky-700 border-sky-200';
+  const hydrationIndex = getHydrationIndex(log.beverage_name, log.category);
+  const effectiveMl = getEffectiveHydrationMl(log);
 
   return (
     <button
@@ -58,10 +66,17 @@ export default function LogCard({ log, onSelect, showDate = false }) {
 
       <div className="flex items-center gap-2 shrink-0">
         <div className="text-right">
-          <span className="text-base sm:text-lg font-bold text-sky-600">
-            +{log.amount_ml}
-          </span>
-          <span className="text-xs text-slate-400 ml-0.5">ml</span>
+          <div>
+            <span className="text-base sm:text-lg font-bold text-sky-600">
+              +{log.amount_ml}
+            </span>
+            <span className="text-xs text-slate-400 ml-0.5">ml</span>
+          </div>
+          {hydrationIndex !== 100 && (
+            <div className="text-[11px] font-semibold text-cyan-600">
+              {hydrationIndex}% · {effectiveMl} ml efektif
+            </div>
+          )}
         </div>
         <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-sky-500 group-hover:translate-x-0.5 transition-all" />
       </div>
