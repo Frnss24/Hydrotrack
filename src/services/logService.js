@@ -1,24 +1,22 @@
 import { apiClient } from '../config/api'
-import { INITIAL_LOGS_LOCAL } from '../data/hydroLocal'
 import { getUserIdentifier } from './userService'
 
-const LOCAL_LOGS_KEY = 'hydrotrack_logs'
 export const LOGS_EVENT = 'hydrotrack:logs-changed'
+
+const getCacheKey = () => `hydrotrack_logs_${getUserIdentifier()}`
 
 export const readLocalLogs = () => {
   try {
-    const raw = localStorage.getItem(LOCAL_LOGS_KEY)
-    if (raw) return JSON.parse(raw)
-    localStorage.setItem(LOCAL_LOGS_KEY, JSON.stringify(INITIAL_LOGS_LOCAL))
-    return INITIAL_LOGS_LOCAL
+    const raw = localStorage.getItem(getCacheKey())
+    return raw ? JSON.parse(raw) : []
   } catch {
-    return INITIAL_LOGS_LOCAL
+    return []
   }
 }
 
 export const writeLocalLogs = (logs) => {
   try {
-    localStorage.setItem(LOCAL_LOGS_KEY, JSON.stringify(logs))
+    localStorage.setItem(getCacheKey(), JSON.stringify(logs))
     window.dispatchEvent(new Event(LOGS_EVENT))
   } catch {
     /* ignore */
@@ -33,10 +31,8 @@ class LogService {
         params: { user_identifier: userId },
       })
       const list = Array.isArray(res) ? res : res?.data || []
-      if (list.length > 0) {
-        return { success: true, data: list, isLocal: false }
-      }
-      return { success: true, data: readLocalLogs(), isLocal: true }
+      localStorage.setItem(getCacheKey(), JSON.stringify(list))
+      return { success: true, data: list, isLocal: false }
     } catch {
       return { success: true, data: readLocalLogs(), isLocal: true }
     }
@@ -69,11 +65,11 @@ class LogService {
 
   async update(id, payload) {
     try {
-      if (!String(id).startsWith('log-') && !String(id).startsWith('local-')) {
+      if (!String(id).startsWith('local-')) {
         await apiClient.put(`/api/logs/${id}`, payload)
       }
     } catch {
-      /* fallback to local update */
+      /* fallback to local cache update */
     }
     const current = readLocalLogs()
     const updated = current.map((item) =>
@@ -88,11 +84,11 @@ class LogService {
 
   async remove(id) {
     try {
-      if (!String(id).startsWith('log-') && !String(id).startsWith('local-')) {
+      if (!String(id).startsWith('local-')) {
         await apiClient.delete(`/api/logs/${id}`)
       }
     } catch {
-      /* fallback to local delete */
+      /* fallback to local cache delete */
     }
     const current = readLocalLogs().filter(
       (item) => String(item.id) !== String(id),

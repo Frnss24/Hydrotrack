@@ -42,7 +42,7 @@ export const getUserProfile = () => {
   return {
     username: 'Pengguna HydroTrack',
     weightKg: 60,
-    dailyTargetMl: 2000,
+    dailyTargetMl: 2100,
     bio: 'Menjaga hidrasi harian agar tetap fokus dan sehat.',
     avatar: null,
     userId: getUserIdentifier(),
@@ -53,7 +53,7 @@ export const saveUserProfile = (profile) => {
   try {
     const data = {
       ...profile,
-      dailyTargetMl: Number(profile.dailyTargetMl) || 2000,
+      dailyTargetMl: Number(profile.dailyTargetMl) || 2100,
       weightKg: Number(profile.weightKg) || 60,
       userId: getUserIdentifier(),
       updatedAt: new Date().toISOString(),
