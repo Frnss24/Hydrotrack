@@ -11,9 +11,11 @@ import BeveragesPage from './pages/BeveragesPage';
 import ProfileAboutPage from './pages/ProfileAboutPage';
 import LogDetail from './components/logs/LogDetail';
 import BeverageDetail from './components/beverages/BeverageDetail';
+import { useGlobalAppEffects } from './hooks/useReminderNotifications';
 import './App.css';
 
 export default function App() {
+  useGlobalAppEffects();
   const [showSplash, setShowSplash] = useState(true);
   const [activeTab, setActiveTab] = useState('Dashboard');
   const [selectedLog, setSelectedLog] = useState(null);

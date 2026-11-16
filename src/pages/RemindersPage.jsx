@@ -11,36 +11,13 @@ import {
   AlertCircle,
 } from 'lucide-react';
 import { getUserProfile, PROFILE_EVENT } from '../services/userService';
-
-const REMINDER_STORAGE_KEY = 'hydrotrack_reminder_settings';
-const INTERVAL_OPTIONS = [45, 60, 90, 120];
-
-const DEFAULT_SETTINGS = {
-  enabled: false,
-  wakeTime: '07:00',
-  sleepTime: '22:00',
-  intervalMinutes: 90,
-};
-
-function loadReminderSettings() {
-  try {
-    const raw = localStorage.getItem(REMINDER_STORAGE_KEY);
-    return raw ? { ...DEFAULT_SETTINGS, ...JSON.parse(raw) } : DEFAULT_SETTINGS;
-  } catch {
-    return DEFAULT_SETTINGS;
-  }
-}
-
-function toMinutes(timeStr) {
-  const [h, m] = String(timeStr || '07:00').split(':').map(Number);
-  return (h || 0) * 60 + (m || 0);
-}
-
-function formatMinutes(totalMin) {
-  const h = Math.floor(totalMin / 60) % 24;
-  const m = totalMin % 60;
-  return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-}
+import {
+  INTERVAL_OPTIONS,
+  loadReminderSettings,
+  saveReminderSettings,
+  buildReminderSchedule,
+  showHydroNotification,
+} from '../utils/reminderSchedule';
 
 export default function RemindersPage() {
   const [settings, setSettings] = useState(loadReminderSettings);
@@ -57,69 +34,18 @@ export default function RemindersPage() {
   }, []);
 
   useEffect(() => {
-    try {
-      localStorage.setItem(REMINDER_STORAGE_KEY, JSON.stringify(settings));
-    } catch {
-      /* ignore */
-    }
+    saveReminderSettings(settings);
   }, [settings]);
 
-  // Active browser notification timer while app is open
-  useEffect(() => {
-    if (!settings.enabled || notifStatus !== 'granted') return;
-    const ms = settings.intervalMinutes * 60 * 1000;
-    const timer = setInterval(() => {
-      const now = new Date();
-      const nowMin = now.getHours() * 60 + now.getMinutes();
-      const wakeMin = toMinutes(settings.wakeTime);
-      const sleepMin = toMinutes(settings.sleepTime);
-      if (nowMin >= wakeMin && nowMin <= sleepMin) {
-        new Notification('Waktunya Minum Air - HydroTrack', {
-          body: 'Yuk minum segelas air sekarang agar target hidrasi harianmu tetap terjaga.',
-          icon: '/icon-192.png',
-        });
-      }
-    }, ms);
-    return () => clearInterval(timer);
-  }, [settings, notifStatus]);
-
-  const schedule = useMemo(() => {
-    const wakeMin = toMinutes(settings.wakeTime);
-    const sleepMin = toMinutes(settings.sleepTime);
-    const step = Math.max(30, Number(settings.intervalMinutes) || 90);
-    const endMin = sleepMin > wakeMin ? sleepMin : wakeMin + 14 * 60;
-
-    const slots = [];
-    for (let t = wakeMin; t <= endMin; t += step) {
-      slots.push(t);
-    }
-    if (slots.length === 0) slots.push(wakeMin);
-
-    const targetMl = profile.dailyTargetMl || 2100;
-    const perSessionMl = Math.round(targetMl / slots.length);
-    const now = new Date();
-    const nowMin = now.getHours() * 60 + now.getMinutes();
-
-    return slots.map((min, idx) => ({
-      id: idx,
-      time: formatMinutes(min),
-      minutes: min,
-      amountMl: perSessionMl,
-      label:
-        idx === 0
-          ? 'Minum Setelah Bangun'
-          : idx === slots.length - 1
-            ? 'Sesi Sebelum Tidur'
-            : 'Sesi Hidrasi Berkala',
-      isPast: min < nowMin,
-      isNext: min >= nowMin && (idx === 0 || slots[idx - 1] < nowMin),
-    }));
-  }, [settings.wakeTime, settings.sleepTime, settings.intervalMinutes, profile.dailyTargetMl]);
+  const schedule = useMemo(
+    () => buildReminderSchedule(settings, profile.dailyTargetMl || 2100),
+    [settings, profile.dailyTargetMl]
+  );
 
   const handleToggleNotifications = async () => {
     if (typeof Notification === 'undefined') {
       setToast('Browser ini tidak mendukung Web Notification.');
-      setTimeout(() => setToast(''), 3000);
+      setTimeout(() => setToast(''), 3200);
       return;
     }
 
@@ -128,21 +54,27 @@ export default function RemindersPage() {
       setNotifStatus(perm);
       if (perm === 'granted') {
         setSettings((prev) => ({ ...prev, enabled: true }));
+        await showHydroNotification(
+          'Pengingat HydroTrack Aktif',
+          `Jadwal minum setiap ${settings.intervalMinutes} menit sudah diaktifkan.`
+        );
         setToast('Pengingat notifikasi berhasil diaktifkan!');
       } else {
-        setToast('Izin notifikasi ditolak oleh browser.');
+        setToast(
+          'Izin notifikasi diblokir browser. Izinkan notifikasi lewat ikon gembok di address bar.'
+        );
       }
     } else {
       setSettings((prev) => ({ ...prev, enabled: false }));
       setToast('Pengingat notifikasi dinonaktifkan.');
     }
-    setTimeout(() => setToast(''), 2800);
+    setTimeout(() => setToast(''), 3500);
   };
 
   const handleTestNotification = async () => {
     if (typeof Notification === 'undefined') {
       setToast('Browser ini tidak mendukung Web Notification.');
-      setTimeout(() => setToast(''), 2800);
+      setTimeout(() => setToast(''), 3200);
       return;
     }
 
@@ -153,15 +85,21 @@ export default function RemindersPage() {
     }
 
     if (perm === 'granted') {
-      new Notification('Tes Pengingat HydroTrack', {
-        body: `Jangan lupa minum ${schedule[0]?.amountMl || 250} ml air putih sekarang.`,
-        icon: '/icon-192.png',
-      });
-      setToast('Notifikasi percobaan telah dikirim!');
+      const sent = await showHydroNotification(
+        'Tes Pengingat HydroTrack',
+        `Jangan lupa minum ${schedule[0]?.amountMl || 250} ml air putih sekarang.`
+      );
+      setToast(
+        sent
+          ? 'Notifikasi dikirim! Jika tidak muncul di macOS, cek System Settings > Notifications > Brave/Chrome.'
+          : 'Gagal mengirim notifikasi pada browser ini.'
+      );
     } else {
-      setToast('Aktifkan izin notifikasi di pengaturan browser terlebih dahulu.');
+      setToast(
+        'Izin notifikasi belum aktif atau diblokir. Klik ikon gembok di address bar browser untuk mengizinkan.'
+      );
     }
-    setTimeout(() => setToast(''), 2800);
+    setTimeout(() => setToast(''), 4000);
   };
 
   return (
