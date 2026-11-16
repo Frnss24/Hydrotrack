@@ -3,4 +3,5 @@ dist/
 .vite/
 .env
 *.local
+*.sql
 .DS_Store
