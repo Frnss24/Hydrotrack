@@ -7,6 +7,7 @@ const getCacheKey = () => `hydrotrack_logs_${getUserIdentifier()}`
 
 export const readLocalLogs = () => {
   try {
+    localStorage.removeItem('hydrotrack_logs')
     const raw = localStorage.getItem(getCacheKey())
     return raw ? JSON.parse(raw) : []
   } catch {

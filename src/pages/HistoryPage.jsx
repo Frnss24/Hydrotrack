@@ -88,13 +88,18 @@ export default function HistoryPage({ onSelectLog }) {
                       }`}
                     />
                   </div>
-                  <span
-                    className={`text-xs font-medium ${
-                      day.isToday ? 'text-sky-700 font-bold' : 'text-slate-500'
-                    }`}
-                  >
-                    {day.label}
-                  </span>
+                  <div className="text-center leading-tight">
+                    <span
+                      className={`block text-xs font-medium ${
+                        day.isToday ? 'text-sky-700 font-bold' : 'text-slate-500'
+                      }`}
+                    >
+                      {day.label}
+                    </span>
+                    <span className="block text-[10px] text-slate-400">
+                      {day.dateStr}
+                    </span>
+                  </div>
                 </div>
               );
             })}
