@@ -4,13 +4,18 @@ import { useBeverages } from '../hooks/useBeverages';
 import { useFavorites } from '../hooks/useFavorites';
 import BeverageCard from '../components/beverages/BeverageCard';
 
-const CATEGORIES = ['Semua', 'Favorit', 'Air Putih', 'Air Mineral', 'Infused', 'Elektrolit', 'Teh'];
-
 export default function BeveragesPage({ onSelectBeverage }) {
   const { beverages, loading } = useBeverages();
   const { favorites } = useFavorites();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua');
+
+  const categories = useMemo(() => {
+    const unique = Array.from(
+      new Set(beverages.map((b) => b.category).filter(Boolean))
+    );
+    return ['Semua', 'Favorit', ...unique];
+  }, [beverages]);
 
   const filteredBeverages = useMemo(() => {
     return beverages.filter((bev) => {
@@ -21,11 +26,14 @@ export default function BeveragesPage({ onSelectBeverage }) {
             ? favorites.includes(bev.id)
             : bev.category === selectedCategory;
       const q = searchQuery.trim().toLowerCase();
+      const benefitsText = Array.isArray(bev.benefits)
+        ? bev.benefits.join(' ')
+        : bev.benefits || '';
       const matchSearch =
         !q ||
         (bev.name || '').toLowerCase().includes(q) ||
         (bev.description || '').toLowerCase().includes(q) ||
-        (bev.benefits || '').toLowerCase().includes(q);
+        benefitsText.toLowerCase().includes(q);
       return matchCategory && matchSearch;
     });
   }, [beverages, favorites, selectedCategory, searchQuery]);
@@ -58,7 +66,7 @@ export default function BeveragesPage({ onSelectBeverage }) {
         </div>
 
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
-          {CATEGORIES.map((category) => (
+          {categories.map((category) => (
             <button
               key={category}
               type="button"

@@ -5,13 +5,18 @@ import { getLast7DaysChart } from '../utils/helpers';
 import { getUserProfile, PROFILE_EVENT } from '../services/userService';
 import LogCard from '../components/logs/LogCard';
 
-const CATEGORIES = ['Semua', 'Air Putih', 'Air Mineral', 'Infused', 'Elektrolit', 'Teh'];
-
 export default function HistoryPage({ onSelectLog }) {
   const { logs, loading } = useLogs();
   const [profile, setProfile] = useState(getUserProfile);
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Semua');
+
+  const categories = useMemo(() => {
+    const unique = Array.from(
+      new Set(logs.map((l) => l.category).filter(Boolean))
+    );
+    return ['Semua', ...unique];
+  }, [logs]);
 
   useEffect(() => {
     const syncProfile = () => setProfile(getUserProfile());
@@ -122,7 +127,7 @@ export default function HistoryPage({ onSelectLog }) {
 
         <div className="flex items-center gap-2 overflow-x-auto pb-1">
           <Filter className="w-4 h-4 text-sky-500 shrink-0" />
-          {CATEGORIES.map((category) => (
+          {categories.map((category) => (
             <button
               key={category}
               type="button"
