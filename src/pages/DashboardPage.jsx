@@ -300,11 +300,11 @@ export default function DashboardPage({ onSelectLog, onNavigate }) {
             </p>
             <button
               type="button"
-              onClick={() => onNavigate('LogDrink')}
+              onClick={() => onNavigate('Beverages')}
               className="mt-1 inline-flex items-center gap-1.5 text-xs font-semibold text-sky-600 hover:text-sky-700 cursor-pointer"
             >
               <Plus className="w-4 h-4" />
-              Catat Minuman Pertama
+              Pilih dari Katalog Minuman
             </button>
           </div>
         ) : (

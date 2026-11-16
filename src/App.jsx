@@ -5,8 +5,9 @@ import PWABadge from './components/PWABadge';
 import SplashScreen from './components/common/SplashScreen';
 import DashboardPage from './pages/DashboardPage';
 import HistoryPage from './pages/HistoryPage';
+import RemindersPage from './pages/RemindersPage';
+import AchievementsPage from './pages/AchievementsPage';
 import BeveragesPage from './pages/BeveragesPage';
-import LogDrinkPage from './pages/LogDrinkPage';
 import ProfileAboutPage from './pages/ProfileAboutPage';
 import LogDetail from './components/logs/LogDetail';
 import BeverageDetail from './components/beverages/BeverageDetail';
@@ -61,8 +62,10 @@ export default function App() {
     switch (activeTab) {
       case 'History':
         return <HistoryPage onSelectLog={handleSelectLog} />;
-      case 'LogDrink':
-        return <LogDrinkPage onSuccess={() => handleSelectTab('Dashboard')} />;
+      case 'Reminders':
+        return <RemindersPage />;
+      case 'Achievements':
+        return <AchievementsPage />;
       case 'Beverages':
         return <BeveragesPage onSelectBeverage={handleSelectBeverage} />;
       case 'Profile':
@@ -84,7 +87,7 @@ export default function App() {
 
       <Header
         onLogoClick={() => handleSelectTab('Dashboard')}
-        onQuickAdd={() => handleSelectTab('LogDrink')}
+        onOpenReminders={() => handleSelectTab('Reminders')}
       />
 
       <main className="app-main">{renderContent()}</main>

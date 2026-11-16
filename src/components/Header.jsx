@@ -1,6 +1,6 @@
-import { Plus } from 'lucide-react'
+import { Bell } from 'lucide-react'
 
-export default function Header({ onLogoClick, onQuickAdd }) {
+export default function Header({ onLogoClick, onOpenReminders }) {
   return (
     <header className="header">
       <div
@@ -19,14 +19,14 @@ export default function Header({ onLogoClick, onQuickAdd }) {
         </div>
       </div>
 
-      {onQuickAdd && (
+      {onOpenReminders && (
         <button
           type="button"
           className="btn btn--primary btn--sm"
-          onClick={onQuickAdd}
+          onClick={onOpenReminders}
         >
-          <Plus size={16} />
-          <span>Catat Air</span>
+          <Bell size={15} />
+          <span>Pengingat</span>
         </button>
       )}
     </header>
