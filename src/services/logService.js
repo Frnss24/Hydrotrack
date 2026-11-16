@@ -25,9 +25,47 @@ export const writeLocalLogs = (logs) => {
 }
 
 class LogService {
+  async syncPendingLogs() {
+    const current = readLocalLogs()
+    const pending = current.filter(
+      (item) => item.pendingSync || String(item.id).startsWith('local-log-'),
+    )
+    if (pending.length === 0) return 0
+
+    let syncedCount = 0
+    let nextLogs = [...current]
+
+    for (const item of pending) {
+      try {
+        const res = await apiClient.post('/api/logs', {
+          user_identifier: item.user_identifier || getUserIdentifier(),
+          beverage_name: item.beverage_name,
+          category: item.category,
+          amount_ml: item.amount_ml,
+          consumed_at: item.consumed_at,
+          mood: item.mood,
+          notes: item.notes,
+        })
+        const created = res?.data || res
+        nextLogs = nextLogs.map((l) =>
+          String(l.id) === String(item.id) ? created : l,
+        )
+        syncedCount += 1
+      } catch {
+        break // still offline
+      }
+    }
+
+    if (syncedCount > 0) {
+      writeLocalLogs(nextLogs)
+    }
+    return syncedCount
+  }
+
   async getAll() {
     const userId = getUserIdentifier()
     try {
+      await this.syncPendingLogs()
       const res = await apiClient.get('/api/logs', {
         params: { user_identifier: userId },
       })
@@ -57,6 +95,7 @@ class LogService {
       const localItem = {
         ...fullPayload,
         id: `local-log-${Date.now()}`,
+        pendingSync: true,
       }
       const current = readLocalLogs()
       writeLocalLogs([localItem, ...current])
